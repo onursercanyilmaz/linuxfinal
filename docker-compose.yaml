@@ -1,0 +1,44 @@
+version: '3'
+services:
+  drupal:
+    image: bitnami/drupal:latest
+    ports:
+      - 80:80
+    volumes:
+      - drupal_data:/bitnami/drupal
+    depends_on:
+      - mariadb
+    environment:
+      - MARIADB_HOST=mariadb
+      - MARIADB_PORT_NUMBER=3306
+      - ALLOW_EMPTY_PASSWORD=yes
+  mariadb:
+    image: bitnami/mariadb:latest
+    environment:
+      - MARIADB_USER=YAM428
+      - MARIADB_PASSWORD=30718062
+      - MARIADB_DATABASE=final
+    volumes:
+      - mariadb_data:/bitnami/mariadb
+  webserver:
+    image: nginx
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - drupal_data:/bitnami/drupal
+      - certbot_certs:/etc/letsencrypt
+      - certbot_data:/var/lib/letsencrypt
+    depends_on:
+      - drupal
+  certbot:
+    image: certbot
+    volumes:
+      - certbot_certs:/etc/letsencrypt
+      - certbot_data:/var/lib/letsencrypt
+    command: certonly --webroot --webroot-path=/var/www/html --email onursercanyilmaz@gmail.com --agree-tos --no-eff-email --staging -d onursercanyilmaz.online
+volumes:
+  drupal_data:
+  mariadb_data:
+  certbot_certs:
+  certbot_data:
